@@ -410,7 +410,7 @@ const deleteSubTask = async (taskId, subTaskId) => {
     '删除确认',
     {
       confirmButtonText: '删除',
-      cancelButtonText: '取消',
+      showCancelButton: false,
       type: 'warning',
     }
   )
@@ -474,7 +474,7 @@ const deleteTask = async (id) => {
     '删除确认',
     {
       confirmButtonText: '删除',
-      cancelButtonText: '取消',
+      showCancelButton: false,
       type: 'warning',
     }
   )

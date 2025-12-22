@@ -107,6 +107,48 @@ a:hover {
   }
 }
 
+// MessageBox 确认对话框样式
+.el-message-box {
+  --el-messagebox-title-color: #fff !important;
+  --el-messagebox-content-color: #fff !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+
+  .el-message-box__header {
+    padding: 20px 20px 10px !important;
+  }
+
+  .el-message-box__title {
+    color: #fff !important;
+    font-size: 1.1rem !important;
+  }
+
+  .el-message-box__content {
+    padding: 10px 20px !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  .el-message-box__btns {
+    padding: 10px 20px 20px !important;
+
+    .el-button {
+      border-radius: 8px !important;
+      
+      &.el-button--primary {
+        background-color: rgba(255, 107, 107, 0.8) !important;
+        border-color: transparent !important;
+        color: #fff !important;
+
+        &:hover {
+          background-color: rgba(255, 107, 107, 1) !important;
+        }
+      }
+    }
+  }
+}
+
 // 进度条样式
 .el-progress-bar {
   .el-progress-bar__outer {
