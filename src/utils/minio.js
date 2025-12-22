@@ -105,18 +105,11 @@ class MinIOClient {
    */
   async readTasks() {
     try {
-      const date = new Date();
-      const emptyHash = await this.sha256('');
-      const { authorization, amzDate, contentHash } = await this.generateSignature('GET', date, emptyHash);
-      
       const url = `${this.endpoint}/${this.bucket}/${this.objectKey}`;
+      
+      // 如果 bucket 是公开的，直接请求，不需要签名
       const response = await fetch(url, {
         method: 'GET',
-        headers: {
-          'Authorization': authorization,
-          'x-amz-content-sha256': contentHash,
-          'x-amz-date': amzDate,
-        },
       });
 
       if (response.status === 404) {
@@ -149,17 +142,12 @@ class MinIOClient {
   async saveTasks(tasks) {
     try {
       const content = JSON.stringify(tasks, null, 2);
-      const date = new Date();
-      const contentHash = await this.sha256(content);
-      const { authorization, amzDate } = await this.generateSignature('PUT', date, contentHash);
-      
       const url = `${this.endpoint}/${this.bucket}/${this.objectKey}`;
+      
+      // 如果 bucket 是公开的，直接请求，不需要签名
       const response = await fetch(url, {
         method: 'PUT',
         headers: {
-          'Authorization': authorization,
-          'x-amz-content-sha256': contentHash,
-          'x-amz-date': amzDate,
           'Content-Type': 'application/json',
         },
         body: content,
