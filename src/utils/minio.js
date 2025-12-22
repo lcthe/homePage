@@ -126,13 +126,7 @@ class MinIOClient {
       return data || [];
     } catch (error) {
       console.error('读取任务失败:', error);
-      // 如果读取失败，尝试从本地存储恢复
-      const localData = localStorage.getItem('todoTasks');
-      if (localData) {
-        console.log('从本地存储恢复任务');
-        return JSON.parse(localData);
-      }
-      return [];
+      throw error;
     }
   }
 
@@ -157,15 +151,10 @@ class MinIOClient {
         throw new Error(`保存失败: ${response.status} ${response.statusText}`);
       }
 
-      // 同时保存到本地作为备份
-      localStorage.setItem('todoTasks', JSON.stringify(tasks));
       console.log('保存任务到 MinIO 成功');
       return true;
     } catch (error) {
       console.error('保存任务失败:', error);
-      // 保存失败时至少保存到本地
-      localStorage.setItem('todoTasks', JSON.stringify(tasks));
-      console.log('已保存到本地存储作为备份');
       throw error;
     }
   }

@@ -523,7 +523,7 @@ const saveTasks = async () => {
     }
   } catch (error) {
     console.error('保存任务失败:', error);
-    ElMessage.error('保存任务失败，已保存到本地浏览器');
+    ElMessage.error('保存任务失败');
   } finally {
     loading.value = false;
   }
@@ -536,6 +536,9 @@ const loadTasks = async () => {
     if ((storageType === 'webdav' || storageType === 'minio') && storageClient) {
       // 从 WebDAV 或 MinIO 加载
       tasks.value = await storageClient.readTasks();
+      console.log('从远程存储加载任务成功，任务数量:', tasks.value.length);
+      // 清除本地缓存，避免混淆
+      localStorage.removeItem("todoTasks");
     } else {
       // 从 localStorage 加载
       const saved = localStorage.getItem("todoTasks");
@@ -543,10 +546,8 @@ const loadTasks = async () => {
     }
   } catch (error) {
     console.error('加载任务失败:', error);
-    ElMessage.error('加载任务失败，尝试从本地恢复');
-    // 尝试从本地恢复
-    const saved = localStorage.getItem("todoTasks");
-    tasks.value = saved ? JSON.parse(saved) : [];
+    ElMessage.error('加载任务失败');
+    tasks.value = [];
   } finally {
     loading.value = false;
   }
