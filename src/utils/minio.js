@@ -108,8 +108,10 @@ class MinIOClient {
       const url = `${this.endpoint}/${this.bucket}/${this.objectKey}`;
       
       // 如果 bucket 是公开的，直接请求，不需要签名
-      const response = await fetch(url, {
+      // 添加时间戳防止缓存
+      const response = await fetch(url + '?t=' + Date.now(), {
         method: 'GET',
+        cache: 'no-cache',
       });
 
       if (response.status === 404) {
@@ -122,7 +124,7 @@ class MinIOClient {
       }
 
       const data = await response.json();
-      console.log('从 MinIO 加载任务成功');
+      console.log('从 MinIO 加载任务成功，任务数量:', data.length);
       return data || [];
     } catch (error) {
       console.error('读取任务失败:', error);
@@ -138,16 +140,21 @@ class MinIOClient {
       const content = JSON.stringify(tasks, null, 2);
       const url = `${this.endpoint}/${this.bucket}/${this.objectKey}`;
       
+      console.log('正在保存任务到 MinIO，任务数量:', tasks.length);
+      
       // 如果 bucket 是公开的，直接请求，不需要签名
       const response = await fetch(url, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
         },
         body: content,
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('保存失败响应:', errorText);
         throw new Error(`保存失败: ${response.status} ${response.statusText}`);
       }
 
