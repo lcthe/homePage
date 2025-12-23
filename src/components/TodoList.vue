@@ -60,19 +60,42 @@
                   </Icon>
                 </div>
                 <div class="task-content">
-                  <span class="task-text" @click="toggleTask(task.id)">{{ task.text }}</span>
-                  <div class="task-meta">
-                    <span v-if="task.dueDate" class="due-date" :class="{ overdue: isOverdue(task) }">
+                  <!-- 编辑模式 -->
+                  <div v-if="editingTask === task.id" class="task-edit">
+                    <input
+                      v-model="editingTaskText"
+                      @keyup.enter="saveEditTask"
+                      @keyup.esc="cancelEditTask"
+                      class="task-edit-input"
+                      autofocus
+                    />
+                    <button @click="saveEditTask" class="save-edit-btn">
                       <Icon size="14">
-                        <Calendar />
+                        <Check />
                       </Icon>
-                      {{ formatDate(task.dueDate) }}
-                      <span v-if="!task.completed && isOverdue(task)" class="overdue-tag">已逾期</span>
-                      <span v-else-if="!task.completed && isDueToday(task)" class="today-tag">今天到期</span>
-                    </span>
-                    <span v-if="getSubTaskProgress(task)" class="subtask-progress">
-                      {{ getSubTaskProgress(task).completed }}/{{ getSubTaskProgress(task).total }}
-                    </span>
+                    </button>
+                    <button @click="cancelEditTask" class="cancel-edit-btn">
+                      <Icon size="14">
+                        <Close />
+                      </Icon>
+                    </button>
+                  </div>
+                  <!-- 显示模式 -->
+                  <div v-else>
+                    <span class="task-text" @click="startEditTask(task)" @dblclick="toggleTask(task.id)">{{ task.text }}</span>
+                    <div class="task-meta">
+                      <span v-if="task.dueDate" class="due-date" :class="{ overdue: isOverdue(task) }">
+                        <Icon size="14">
+                          <Calendar />
+                        </Icon>
+                        {{ formatDate(task.dueDate) }}
+                        <span v-if="!task.completed && isOverdue(task)" class="overdue-tag">已逾期</span>
+                        <span v-else-if="!task.completed && isDueToday(task)" class="today-tag">今天到期</span>
+                      </span>
+                      <span v-if="getSubTaskProgress(task)" class="subtask-progress">
+                        {{ getSubTaskProgress(task).completed }}/{{ getSubTaskProgress(task).total }}
+                      </span>
+                    </div>
                   </div>
                 </div>
                 <button class="add-subtask-btn" @click="toggleSubTaskInput(task.id)" title="添加子任务">
@@ -116,7 +139,28 @@
                         <Check />
                       </Icon>
                     </div>
-                    <span class="subtask-text" @click="toggleSubTask(task.id, subTask.id)">
+                    <!-- 编辑模式 -->
+                    <div v-if="editingSubTask.taskId === task.id && editingSubTask.subTaskId === subTask.id" class="subtask-edit">
+                      <input
+                        v-model="editingSubTaskText"
+                        @keyup.enter="saveEditSubTask"
+                        @keyup.esc="cancelEditSubTask"
+                        class="subtask-edit-input"
+                        autofocus
+                      />
+                      <button @click="saveEditSubTask" class="save-edit-btn">
+                        <Icon size="12">
+                          <Check />
+                        </Icon>
+                      </button>
+                      <button @click="cancelEditSubTask" class="cancel-edit-btn">
+                        <Icon size="12">
+                          <Close />
+                        </Icon>
+                      </button>
+                    </div>
+                    <!-- 显示模式 -->
+                    <span v-else class="subtask-text" @click="startEditSubTask(task.id, subTask)" @dblclick="toggleSubTask(task.id, subTask.id)">
                       {{ subTask.text }}
                     </span>
                     <button class="subtask-delete-btn" @click="deleteSubTask(task.id, subTask.id)">
@@ -163,11 +207,34 @@
                     </Icon>
                   </div>
                   <div class="task-content">
-                    <span class="task-text" @click="toggleTask(task.id)">{{ task.text }}</span>
-                    <div class="task-meta">
-                      <span v-if="getSubTaskProgress(task)" class="subtask-progress">
-                        {{ getSubTaskProgress(task).completed }}/{{ getSubTaskProgress(task).total }}
-                      </span>
+                    <!-- 编辑模式 -->
+                    <div v-if="editingTask === task.id" class="task-edit">
+                      <input
+                        v-model="editingTaskText"
+                        @keyup.enter="saveEditTask"
+                        @keyup.esc="cancelEditTask"
+                        class="task-edit-input"
+                        autofocus
+                      />
+                      <button @click="saveEditTask" class="save-edit-btn">
+                        <Icon size="14">
+                          <Check />
+                        </Icon>
+                      </button>
+                      <button @click="cancelEditTask" class="cancel-edit-btn">
+                        <Icon size="14">
+                          <Close />
+                        </Icon>
+                      </button>
+                    </div>
+                    <!-- 显示模式 -->
+                    <div v-else>
+                      <span class="task-text" @click="startEditTask(task)" @dblclick="toggleTask(task.id)">{{ task.text }}</span>
+                      <div class="task-meta">
+                        <span v-if="getSubTaskProgress(task)" class="subtask-progress">
+                          {{ getSubTaskProgress(task).completed }}/{{ getSubTaskProgress(task).total }}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <button class="delete-btn" @click="deleteTask(task.id)">
@@ -190,7 +257,28 @@
                           <Check />
                         </Icon>
                       </div>
-                      <span class="subtask-text" @click="toggleSubTask(task.id, subTask.id)">
+                      <!-- 编辑模式 -->
+                      <div v-if="editingSubTask.taskId === task.id && editingSubTask.subTaskId === subTask.id" class="subtask-edit">
+                        <input
+                          v-model="editingSubTaskText"
+                          @keyup.enter="saveEditSubTask"
+                          @keyup.esc="cancelEditSubTask"
+                          class="subtask-edit-input"
+                          autofocus
+                        />
+                        <button @click="saveEditSubTask" class="save-edit-btn">
+                          <Icon size="12">
+                            <Check />
+                          </Icon>
+                        </button>
+                        <button @click="cancelEditSubTask" class="cancel-edit-btn">
+                          <Icon size="12">
+                            <Close />
+                          </Icon>
+                        </button>
+                      </div>
+                      <!-- 显示模式 -->
+                      <span v-else class="subtask-text" @click="startEditSubTask(task.id, subTask)" @dblclick="toggleSubTask(task.id, subTask.id)">
                         {{ subTask.text }}
                       </span>
                       <button class="subtask-delete-btn" @click="deleteSubTask(task.id, subTask.id)">
@@ -260,6 +348,12 @@ const newTaskDate = ref("");
 // 子任务输入
 const newSubTask = ref({});
 const showSubTaskInput = ref({});
+
+// 编辑状态
+const editingTask = ref(null);
+const editingTaskText = ref("");
+const editingSubTask = ref({ taskId: null, subTaskId: null });
+const editingSubTaskText = ref("");
 
 // 展开状态
 const expandedTasks = ref({});
@@ -396,6 +490,57 @@ const addSubTask = async (taskId) => {
 // 切换子任务输入框显示
 const toggleSubTaskInput = (taskId) => {
   showSubTaskInput.value[taskId] = !showSubTaskInput.value[taskId];
+};
+
+// 开始编辑任务
+const startEditTask = (task) => {
+  editingTask.value = task.id;
+  editingTaskText.value = task.text;
+};
+
+// 取消编辑任务
+const cancelEditTask = () => {
+  editingTask.value = null;
+  editingTaskText.value = "";
+};
+
+// 保存编辑的任务
+const saveEditTask = async () => {
+  if (editingTaskText.value.trim()) {
+    const task = tasks.value.find((t) => t.id === editingTask.value);
+    if (task) {
+      task.text = editingTaskText.value.trim();
+      await saveTasks();
+      cancelEditTask();
+    }
+  }
+};
+
+// 开始编辑子任务
+const startEditSubTask = (taskId, subTask) => {
+  editingSubTask.value = { taskId, subTaskId: subTask.id };
+  editingSubTaskText.value = subTask.text;
+};
+
+// 取消编辑子任务
+const cancelEditSubTask = () => {
+  editingSubTask.value = { taskId: null, subTaskId: null };
+  editingSubTaskText.value = "";
+};
+
+// 保存编辑的子任务
+const saveEditSubTask = async () => {
+  if (editingSubTaskText.value.trim()) {
+    const task = tasks.value.find((t) => t.id === editingSubTask.value.taskId);
+    if (task && task.subTasks) {
+      const subTask = task.subTasks.find((st) => st.id === editingSubTask.value.subTaskId);
+      if (subTask) {
+        subTask.text = editingSubTaskText.value.trim();
+        await saveTasks();
+        cancelEditSubTask();
+      }
+    }
+  }
 };
 
 // 切换任务展开状态
@@ -805,6 +950,65 @@ onMounted(() => {
           flex-direction: column;
           gap: 0.4rem;
 
+          .task-edit {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+
+            .task-edit-input {
+              flex: 1;
+              padding: 0.5rem 0.75rem;
+              background: rgba(255, 255, 255, 0.15);
+              border: 1px solid rgba(255, 255, 255, 0.3);
+              border-radius: 6px;
+              color: #fff;
+              font-size: 0.95rem;
+              outline: none;
+              transition: all 0.3s;
+
+              &:focus {
+                background: rgba(255, 255, 255, 0.2);
+                border-color: rgba(255, 255, 255, 0.5);
+              }
+            }
+
+            .save-edit-btn,
+            .cancel-edit-btn {
+              padding: 0.4rem;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: all 0.3s;
+              flex-shrink: 0;
+
+              &:active {
+                transform: scale(0.95);
+              }
+            }
+
+            .save-edit-btn {
+              background: rgba(76, 175, 80, 0.3);
+              color: #fff;
+
+              &:hover {
+                background: rgba(76, 175, 80, 0.4);
+              }
+            }
+
+            .cancel-edit-btn {
+              background: rgba(255, 107, 107, 0.3);
+              color: #fff;
+
+              &:hover {
+                background: rgba(255, 107, 107, 0.4);
+              }
+            }
+          }
+
           .task-text {
             color: #fff;
             font-size: 0.95rem;
@@ -1014,6 +1218,65 @@ onMounted(() => {
           &.completed .subtask-checkbox {
             background: rgba(255, 255, 255, 0.25);
             border-color: rgba(255, 255, 255, 0.7);
+          }
+
+          .subtask-edit {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+
+            .subtask-edit-input {
+              flex: 1;
+              padding: 0.4rem 0.6rem;
+              background: rgba(255, 255, 255, 0.15);
+              border: 1px solid rgba(255, 255, 255, 0.3);
+              border-radius: 4px;
+              color: #fff;
+              font-size: 0.85rem;
+              outline: none;
+              transition: all 0.3s;
+
+              &:focus {
+                background: rgba(255, 255, 255, 0.2);
+                border-color: rgba(255, 255, 255, 0.5);
+              }
+            }
+
+            .save-edit-btn,
+            .cancel-edit-btn {
+              padding: 0.3rem;
+              border: none;
+              border-radius: 3px;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              transition: all 0.3s;
+              flex-shrink: 0;
+
+              &:active {
+                transform: scale(0.95);
+              }
+            }
+
+            .save-edit-btn {
+              background: rgba(76, 175, 80, 0.3);
+              color: #fff;
+
+              &:hover {
+                background: rgba(76, 175, 80, 0.4);
+              }
+            }
+
+            .cancel-edit-btn {
+              background: rgba(255, 107, 107, 0.3);
+              color: #fff;
+
+              &:hover {
+                background: rgba(255, 107, 107, 0.4);
+              }
+            }
           }
 
           .subtask-text {
